@@ -29,7 +29,7 @@ except ImportError:
 class mpc(MPDClient):
     """MPD Client"""
 
-    def __init__(self, server_id, password=False):
+    def __init__(self, server_id, vmale, password=False):
         # Connect to the MPD server
         MPDClient.__init__(self)
         self.connect(**server_id)
@@ -38,6 +38,11 @@ class mpc(MPDClient):
 
         # Initialize the pyttsx engine
         self.vengine = pyttsx.init("espeak", False)
+        if vmale:
+            self.vengine.setProperty('voice', 'm2')
+        else:
+            self.vengine.setProperty('voice', 'f2')
+                
 
         # Use this to see if the song actually changed 
         # or it was a pause/play event
@@ -64,7 +69,6 @@ class mpc(MPDClient):
         self.close()
         self.disconnect()
 
-
 def main():
     # Argument handling
     from argparse import ArgumentParser
@@ -75,11 +79,13 @@ def main():
             help='specify mpd\'s host (defaults to "localhost")')
     arguments.add_argument('--password', dest='password', default=None,metavar='PASSWORD',
             help='specify mpd\'s password')
+    arguments.add_argument('-m', '--male', dest='vmale', default=False, metavar='VMALE',
+            help='use a male voice instead of female.')
     args = arguments.parse_args()
 
     server_id={"host":args.host, "port":args.port}
 
-    client = mpc(server_id, args.password)
+    client = mpc(server_id, args.vmale, args.password)
     client.idleloop()
 
 if __name__ == '__main__':
