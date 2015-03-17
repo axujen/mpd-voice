@@ -29,7 +29,7 @@ except ImportError:
 class mpc(MPDClient):
     """MPD Client"""
 
-    def __init__(self, server_id, vmale, vrate, password=False):
+    def __init__(self, server_id, vfemale, vrate, password=False):
         # Connect to the MPD server
         MPDClient.__init__(self)
         self.connect(**server_id)
@@ -40,21 +40,23 @@ class mpc(MPDClient):
         self.vengine = pyttsx.init("espeak", False)
         self.vengine.setProperty('rate', vrate)
 
-        if vmale:
-            self.vengine.setProperty('voice', 'm2')
+        if vfemale:
+            self.vengine.setProperty('voice', 'f4')
         else:
-            self.vengine.setProperty('voice', 'f2')
-                
+            self.vengine.setProperty('voice', 'm4')
 
-        # Use this to see if the song actually changed 
-        # or it was a pause/play event
-        self.lastsong = self.currentsong()["id"]
+        # Initialize lastsong variable
+        self.lastsong=None
 
     def idleloop(self):
         """Wait untill a song changes then speak its title."""
 
         while True:
             self.idle('player') # wait for a signal from mpd
+
+            # Skip if the music is not playing
+            if not self.status()['state'] == 'play':
+                continue
 
             # if the track actually changed
             if self.currentsong()["id"] != self.lastsong:
@@ -81,16 +83,20 @@ def main():
             help='specify mpd\'s host (defaults to "localhost")')
     arguments.add_argument('--password', dest='password', default=None,metavar='PASSWORD',
             help='specify mpd\'s password')
-    arguments.add_argument('-m', '--male', dest='vmale', default=False, metavar='VMALE',
-            help='use a male voice instead of female.')
-    arguments.add_argument('-r', '--rate', dest='vrate', default=150, metavar='VRATE',
+    arguments.add_argument('-f', '--female', dest='vfemale', default=False, action='store_true',
+            help='use a female voice instead of male.')
+    arguments.add_argument('-r', '--rate', dest='vrate', default=150, type=int, metavar='VRATE',
             help='voice rate or speed, (defaults to "150")')
     args = arguments.parse_args()
 
     server_id={"host":args.host, "port":args.port}
 
-    client = mpc(server_id, args.vmale, args.vrate, args.password)
+    client = mpc(server_id, args.vfemale, args.vrate, args.password)
     client.idleloop()
 
 if __name__ == '__main__':
-    main()
+    import sys
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(0)
