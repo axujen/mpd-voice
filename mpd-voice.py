@@ -13,8 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from mpd import MPDClient
-import pyttsx
+try:
+	from mpd import MPDClient
+except ImportError:
+	print('You must install the python-mpd2 module. You can get it from:\n'\
+			'https://pypi.python.org/pypi/python-mpd2')
+	raise SystemExit
+try:
+	import pyttsx
+except ImportError:
+	print('You must install the pyttsx module. You can get it from:\n'\
+			'https://pypi.python.org/pypi/pyttsx')
+	raise SystemExit
 
 class mpc(MPDClient):
     """MPD Client"""
@@ -27,7 +37,7 @@ class mpc(MPDClient):
             self.password(password)
 
         # Initialize the pyttsx engine
-        self.vengine = pyttsx.init()
+        self.vengine = pyttsx.init("espeak", False)
 
         # Use this to see if the song actually changed 
         # or it was a pause/play event
