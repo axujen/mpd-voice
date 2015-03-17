@@ -29,15 +29,17 @@ except ImportError:
 class mpc(MPDClient):
     """MPD Client"""
 
-    def __init__(self, server_id, vmale, password=False):
+    def __init__(self, server_id, vmale, vrate, password=False):
         # Connect to the MPD server
         MPDClient.__init__(self)
         self.connect(**server_id)
         if password:
             self.password(password)
 
-        # Initialize the pyttsx engine
+        # Initialize the pyttsx engine with its settings
         self.vengine = pyttsx.init("espeak", False)
+        self.vengine.setProperty('rate', vrate)
+
         if vmale:
             self.vengine.setProperty('voice', 'm2')
         else:
@@ -81,11 +83,13 @@ def main():
             help='specify mpd\'s password')
     arguments.add_argument('-m', '--male', dest='vmale', default=False, metavar='VMALE',
             help='use a male voice instead of female.')
+    arguments.add_argument('-r', '--rate', dest='vrate', default=150, metavar='VRATE',
+            help='voice rate or speed, (defaults to "150")')
     args = arguments.parse_args()
 
     server_id={"host":args.host, "port":args.port}
 
-    client = mpc(server_id, args.vmale, args.password)
+    client = mpc(server_id, args.vmale, args.vrate, args.password)
     client.idleloop()
 
 if __name__ == '__main__':
