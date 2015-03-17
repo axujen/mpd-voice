@@ -29,13 +29,20 @@ class mpc(MPDClient):
         # Initialize the pyttsx engine
         self.vengine = pyttsx.init()
 
+        # Use this to see if the song actually changed 
+        # or it was a pause/play event
+        self.lastsong = self.currentsong()["id"]
+
     def idleloop(self):
-        """Just wait for the song to change"""
+        """Wait untill a song changes then speak its title."""
 
         while True:
-            self.idle('player') # wait for song change
-            self.speak(self.currentsong()["title"])
+            self.idle('player') # wait for a signal from mpd
 
+            # if the track actually changed
+            if self.currentsong()["id"] != self.lastsong:
+                self.speak(self.currentsong()["title"])
+                self.lastsong = self.currentsong()["id"]
 
     def speak(self, string):
         """Speak the given string"""
